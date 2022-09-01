@@ -1,0 +1,140 @@
+//crear proyecto en laravel
+composer create-project laravel/laravel example-app
+
+//ver todos los comandos de artisan
+php artisan
+
+/******** MIGRACIONES **********/
+//migrar todas las tablas existentes
+php artisan migrate
+
+//crear nueva migración
+php artisan make:migration create_posts_table
+
+//borrar todas las migraciones
+php artisan migrate:rollback
+
+//borrar las dos últimas migraciones
+php artisan migrate:rollback --step=2
+
+//borrar y crear de nuevo todas las migraciones (eliminar toda slas tablas y los datos y los vuelve a crear de nuevo
+php artisan migrate:refresh
+
+/************* CONTROLADORES *************/
+//crear controlador en blanco
+php artisan make:controller PostsController
+
+//crear controlador tipo API
+php artisan make:controller PostsController --api
+//contiene las funciones:
+	/*index ()
+	 *store (Request $request)
+	 *show ($id)
+	 *update (Request $request, $id)
+	 *destroy ($id)
+
+//crear controlador tipo resource
+php artisan make:controller PostsController --resource
+php artisan make:controller PostsController -r
+//contiene las funciones:
+	/*index ()
+	 *create ()
+	 *store (Request $request)
+	 *show ($id)
+	 *edit ($id)
+	 *update (Request $request, $id)
+	 *destroy ($id)
+
+//crear controlador en carpeta
+php artisan make:controller Dashboard/PostsController --resource
+
+//crear controlador y modelo al mismo tiempo
+php artisan make:controller PostController -r -m Post
+php artisan make:controller Dashboard/PostController -r -m Post
+
+/*********** MODELOS *************/
+//crear nuevo modelo
+php artisan make:model Posts
+
+/************ RUTAS *************/
+//listar rutas
+php artisan route:list
+
+/************ VALIDACIÓN *********/
+//crear nuevo request {{nombre del modelo}}/{{nombre de la función o metodo}}
+php artisan make:request Post/StoreRequest
+
+/************ AUTENTICACIÓN ******************/
+//Laravel Breeze es para la autenticación.
+//Instalar laravel breeze
+composer require laravel/breeze --dev
+php artisan breeze:install
+ 
+php artisan migrate
+npm install
+npm run dev
+
+/** npm run watch ----> num run dev **/
+
+//instalar vue
+npm install vue@next vue-loader@next
+//instalar conector de vue con vite
+npm i @vitejs/plugin-vue
+//configurar las dependencias en vite.config.js
+import vue from '@vitejs/plugin-vue';
+//incluir función en el apartado de pluggins
+vue(),
+//despues de todo lo anterior ejecutar
+npm run dev
+
+/************** AUTENTICACIÓN DE ROLES - CREAR MIDDLEWARE DE PROTECCIÓN **********/
+//crear nuevo middleware
+php artisan make:middleware UserAccessDashboardMiddleware
+
+//se crea una función llamaba isAdmin en el modelo de User 
+//lo siguiente es registrarlo en el app/http/kernel para registrar el middleware en la parte de $routeMiddleware
+//se le coloca nombre a la instancia, ej:
+'admin' => \App\Http\Middleware\UserAccessDashboardMiddleware::class,
+//y al final se pone en el archivo web.php de routes en nombre de admin en la parte de middleware
+
+/********** COMPONENTES ***********/
+//crear componente anonimo
+php artisan make:component web.blog.post.index
+
+//crear componente con clase
+php artisan make:component web/blog/post/Index
+
+/********** CREAR REST API ***********/
+1. Crear controlador en la carpeta de Controllers, en una nueva carpeta que se llame Api.
+php artisan make:controller Api/PostController -m Post
+2. En carpeta de routes, archivo api.php colocar:
+Route::resource('post', PostController::class)->except(['create', 'edit']);
+3. Para las peticiones tipo post utilizar Postman.
+4. Agregar la funcion failedValidation a los Requests de Store y Update para evitar conflictos con las peticiones de la formularios que no hacen parte de la Rest API.
+
+/********** REST API AURENTICACIÓN CON LARAVEL SANCTUM **********/
+-------------- SPA Authentication -----------------
+1. Habilitar (descomentar) la linea "\Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class," en el kernel.php
+2. En el cors.php habilitar las credenciales:
+	"support_credentials" => true,
+	***este paso se hace para el uso de axios, axios envia peticiones 		desde javascript***
+3. En el archivo de bootstrap.js "resources/js/bootstrap.js", colocar la siguiente linea:
+axios.defaults.withCredentials = true;
+4. ****OPCIONAL***** Si se está empleando algún dominio diferente a localhost, ir al archivo sanctum.php y colocarlo junto con los demas que aparecen ahí como 'localhost,localhost:3000,127.0.0.1,127.0.0.1:8000,::1,*aquí tu dominio, localhost/miss-universe/public*'
+5. Finalmente ir a routes/api.php y colocar las rutas dentro del siguiente group:
+Route::group(['middleware' => 'auth:sanctum'], function () {
+	/********AQUÍ TUS RUTAS********/
+});
+Ahora si se ingresa por la url para ver los datos get redirige a la página principal y para ver los datos se debe abrir la consola del navegador y colocar la siguiente función:
+axios.get('api/post').then(response => {
+    console.log(response)
+});
+
+--------------- AUTENTICACIÓN EN BASE A TOKENS -------------------
+1. En el modelo de User tiene que estar agregado el HasApiToken (Use Laravel\Sanctum\HasApiTokens).
+2.En el kernel, la linea de \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class, TIENE QUE ESTAR COMENTADA.
+3. Crear Api\UserController.
+4. Crear función login en el Api\UserController
+5. En routes/api.php agregar:
+	route::post('user/login',[UserController::class, 'login']);
+6. Probar en Postman.
